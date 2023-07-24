@@ -100,7 +100,7 @@ namespace Shibuya.Integration
         /// <param name="concurrentTasks"></param>
         /// <param name="token"></param>
         /// <returns></returns>
-        public async Task<string?> ContractsCallAsync(AccountId32 dest, BigInteger value, BigInteger gasLimit, ulong refTime, ulong proofSize, BigInteger? storageDepositLimit, byte[] data, int concurrentTasks, CancellationToken token)
+        public async Task<string?> ContractsCallAsync(AccountId32 dest, BigInteger value, ulong refTime, ulong proofSize, BigInteger? storageDepositLimit, byte[] data, int concurrentTasks, CancellationToken token)
         {
             var extrinsicType = "ContractsCallAsync";
 

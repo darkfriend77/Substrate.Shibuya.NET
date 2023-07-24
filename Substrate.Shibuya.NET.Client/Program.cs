@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.Yaml;
 using Microsoft.VisualBasic;
+using Schnorrkel.Keys;
 using Serilog;
 using Shibuya.Integration;
 using Shibuya.Integration.Client;
@@ -58,8 +59,14 @@ namespace Shibuya.Client
 
         private static async Task RunClientAsync(IConfigurationRoot config, CancellationToken token)
         {
+
+            var miniSecret = new MiniSecret(Utils.HexToByteArray("0xe5be9a5092b81bca64be81d212e7f2f9eba183bb7a90954f7b76361f6edb5c0a"), ExpandMode.Ed25519);
+            var account = Account.Build(KeyType.Sr25519, miniSecret.ExpandToSecret().ToBytes(), miniSecret.GetPair().Public.Key);
+
+            Log.Information("Your address: {address}", Utils.GetAddressFrom(account.Bytes, 5));
+            
             var url = config["node:live"];
-            var client = new ShibuyaNetwork(BaseClient.Alice, url);
+            var client = new ShibuyaNetwork(account, url);
 
             if (!await client.ConnectAsync(true, true, token))
             {
@@ -75,16 +82,30 @@ namespace Shibuya.Client
             // do action in here ...
             Thread.Sleep(3000);
 
-            /*
-            var dest = BaseClient.Alice.ToAccountId32();
-            var value = new BigInteger(1234);
-            var gasLimit = new BigInteger(1234);
-            var refTime = (ulong)0;
-            var proofSize = (ulong)0;
-            var storageDepositLimit = new BigInteger(1234);
-            var data = Utils.HexToByteArray("0x1234567890123456");
-            await client.ContractsCallAsync(dest, value, gasLimit, refTime, proofSize, storageDepositLimit, data, 1, token);
-            */
+            var smartContracAddress = "aKpb5m5WBvTA164EdZhkYHU1SHBixY4QPnxbekMDUSfUYGd";
+            var dest = Utils.GetPublicKeyFrom(smartContracAddress).ToAccountId32();
+            var value = new BigInteger(0);
+            var refTime = (ulong)3951114240;
+            var proofSize = (ulong)125952;
+            var storageDepositLimit = new BigInteger(54000000000);
+            var data = Utils.HexToByteArray("0x1ba63d86363617270650000000000000000000000000000000000000000000000000000014616161616100");
+            var subscriptionId = await client.ContractsCallAsync(dest, value, refTime, proofSize, storageDepositLimit, data, 1, token);
+            if (subscriptionId != null)
+            {
+                Log.Information("SubscriptionId: {subscriptionId}", subscriptionId);
+                var queueInfo = client.ExtrinsicManger.Get(subscriptionId);
+                while (!queueInfo.IsCompleted)
+                {
+                    Log.Information("QueueInfo {subscription} [{state}]", subscriptionId, queueInfo != null ? queueInfo.State.ToString() : queueInfo);
+                    Thread.Sleep(1000);
+                    queueInfo = client.ExtrinsicManger.Get(subscriptionId);
+                }
+            }
+            else
+            {
+                Log.Error("Failed to call contract");
+            }
+
 
             await client.DisconnectAsync();
             Log.Information("Disconnected from {url}", url);
