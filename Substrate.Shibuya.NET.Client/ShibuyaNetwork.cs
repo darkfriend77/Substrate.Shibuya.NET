@@ -127,7 +127,7 @@ namespace Shibuya.Integration
             if (storageDepositLimit != null)
             {
                 var storageDepositLimitValue = new BaseCom<U128>();
-                storageDepositLimitValue.Create(value);
+                storageDepositLimitValue.Create(storageDepositLimit.Value);
                 storageDepositLimitParam.Create(storageDepositLimitValue);
             }
 

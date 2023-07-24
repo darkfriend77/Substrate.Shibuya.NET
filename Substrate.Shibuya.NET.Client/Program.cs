@@ -87,7 +87,7 @@ namespace Shibuya.Client
             var value = new BigInteger(0);
             var refTime = (ulong)3951114240;
             var proofSize = (ulong)125952;
-            var storageDepositLimit = new BigInteger(1000000000000);
+            var storageDepositLimit = new BigInteger(54000000000);
             var data = Utils.HexToByteArray("0x1ba63d86363617270650000000000000000000000000000000000000000000000000000014616161616100");
             var subscriptionId = await client.ContractsCallAsync(dest, value, refTime, proofSize, storageDepositLimit, data, 1, token);
             if (subscriptionId != null)
