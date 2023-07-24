@@ -66,34 +66,41 @@ namespace Shibuya.Integration.Client
                     if (extrinsicUpdate.InBlock?.Value.Length > 0)
                     {
                         queueInfo.Update(QueueInfoState.InBlock, extrinsicUpdate.InBlock.Value);
+                        Log.Debug("Extrinsic {extrinsic} in block {block}", subscriptionId, extrinsicUpdate.InBlock.Value);
                     }
                     else if (extrinsicUpdate.Finalized?.Value.Length > 0)
                     {
                         queueInfo.Update(QueueInfoState.Finalized, extrinsicUpdate.Finalized.Value);
                         _data.Remove(subscriptionId);
+                        Log.Debug("Extrinsic {extrinsic} finalized in block {block}", subscriptionId, extrinsicUpdate.Finalized.Value);
                     }
                     else
                     {
                         queueInfo.Update(QueueInfoState.None);
+                        Log.Debug("Extrinsic {extrinsic} none", subscriptionId);
                     };
                     break;
 
                 case ExtrinsicState.Future:
                     queueInfo.Update(QueueInfoState.Future);
+                    Log.Debug("Extrinsic {extrinsic} future", subscriptionId);
                     break;
 
                 case ExtrinsicState.Ready:
                     queueInfo.Update(QueueInfoState.Ready);
+                    Log.Debug("Extrinsic {extrinsic} ready", subscriptionId);
                     break;
 
                 case ExtrinsicState.Dropped:
                     queueInfo.Update(QueueInfoState.Dropped);
                     _data.Remove(subscriptionId);
+                    Log.Debug("Extrinsic {extrinsic} dropped", subscriptionId);
                     break;
 
                 case ExtrinsicState.Invalid:
                     queueInfo.Update(QueueInfoState.Invalid);
                     _data.Remove(subscriptionId);
+                    Log.Debug("Extrinsic {extrinsic} invalid", subscriptionId);
                     break;
             }
 
